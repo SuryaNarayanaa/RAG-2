@@ -68,11 +68,11 @@ app.post("/newchat" , async (req,res)=>{
     await db.query("insert into chat (chatname) values ($1)",[chatname]);
     res.redirect("/");
   } catch (error) {
-    res.send({error:error});
+    console.log(error);
+    res.render("error404.ejs");
   }
 
-}
-)
+})
 
 app.post("/chat" , async (req,res)=>{
   const chatid = curr_chatid;
@@ -84,7 +84,9 @@ app.post("/chat" , async (req,res)=>{
     await db.query("insert into chatmesages (message,response,chatid) values ($1,$2,$3)",[message,response.data.response,chatid]);
     res.redirect(`/chats?chatid=${chatid}`);
   }catch(error){
-    res.send({error:error});
+    console.log(error);
+    res.render("error404.ejs" , {error : "Bad Request"});
+
   }
 })
 
