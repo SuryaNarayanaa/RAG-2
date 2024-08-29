@@ -38,6 +38,17 @@ BookGPT is an advanced Retrieval-Augmented Generation (RAG) system built using t
   cd RAG-2
   ```
 
+### Configuring Database
+  - Create Database named "BookGPT" in your pgAdmin
+  - Create a .env file inside JavaScriptServer repository and add the following variables
+    ```
+    user="postgres"
+    host="localhost"
+    database="BookGPT"
+    password=<Your PostgreSQL password>
+    port=5432
+    ```
+
 ### Installing Frontend
 
   - Install Dependencies from the package.json file
