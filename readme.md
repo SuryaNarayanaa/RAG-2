@@ -14,10 +14,7 @@ BookGPT is an advanced Retrieval-Augmented Generation (RAG) system built using t
   We are working on a feature that will allow users to upload any PDF file to BookGPT and ask questions about the content within it.
 
 ## Demo
-<video width="600" controls>
-  <source src="./Demo/OlympiadPhase1Demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+[Watch Demo](https://drive.google.com/file/d/11PfuL8QnYItnbMi0fu8Xk5yIBL1SjU5w/view?usp=sharing)
 
 ## Our RAG Architecture
 <img src="./ImageAssets/rag-architecture-diagram.jpg" alt="Alt text" width="600">
