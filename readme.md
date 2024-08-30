@@ -28,8 +28,8 @@ BookGPT is an advanced Retrieval-Augmented Generation (RAG) system built using t
   - PostgreSQL
   - Python 3.9
   - Ollama
-  - CUDA
-  - Cudnn
+  
+  
 ### Clone the repository
   ```
   git clone https://github.com/surya54101q/RAG-2.git
@@ -63,3 +63,18 @@ BookGPT is an advanced Retrieval-Augmented Generation (RAG) system built using t
     npm start
     ```
     This runs the server on the port 3000. Visit http://localhost:3000 to access the frontend
+
+### Installing Backend
+
+  - Intstall python version 3.9 
+  
+  - Create a virtual environment
+
+  - To install all the dependencies
+    ```
+        pip install requirements.txt
+    ```
+  - To start the backend server
+    ```
+    python app.py
+    ```
