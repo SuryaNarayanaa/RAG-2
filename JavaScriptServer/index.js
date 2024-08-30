@@ -16,6 +16,10 @@ const db = new pg.Client({
 
 db.connect();
 
+db.query("create table if not exists chat (id serial primary key, chatname text);");
+db.query("create table if not exists chatmesages (id serial primary key, message text,response text,chatid integer references chat(id));");
+db.query("create table if not exists reviews (id serial primary key, name text, review text);");
+
 let chat;
 let chatname;
 let chatnames;
@@ -68,11 +72,11 @@ app.post("/newchat" , async (req,res)=>{
     await db.query("insert into chat (chatname) values ($1)",[chatname]);
     res.redirect("/");
   } catch (error) {
-    res.send({error:error});
+    console.log(error);
+    res.render("error404.ejs");
   }
 
-}
-)
+})
 
 app.post("/chat" , async (req,res)=>{
   const chatid = curr_chatid;
@@ -84,7 +88,9 @@ app.post("/chat" , async (req,res)=>{
     await db.query("insert into chatmesages (message,response,chatid) values ($1,$2,$3)",[message,response.data.response,chatid]);
     res.redirect(`/chats?chatid=${chatid}`);
   }catch(error){
-    res.send({error:error});
+    console.log(error);
+    res.render("error404.ejs" , {error : "Bad Request"});
+
   }
 })
 
