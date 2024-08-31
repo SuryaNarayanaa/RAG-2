@@ -72,14 +72,22 @@ def build_faiss_index(embeddings):
 
 
 
-def saving_the_model(CHUNK_OP_DIRECTORY_TXT,EXTRACTED_TEXT_FILE):
+def saving_the_model(CHUNK_OP_DIRECTORY_TXT,EXTRACTED_TEXT_FILE ,chat_id):
     FILE_PATH = EXTRACTED_TEXT_FILE
     TEXT_FILE_NAME = os.path.splitext(os.path.basename(FILE_PATH))[0]
-    faiss_index_path = f'model_embeddings/{TEXT_FILE_NAME}_faiss.index'
-    vector_db_path =f'model_embeddings/{TEXT_FILE_NAME}_embeddings.pkl'
+    faiss_index_path = 'model_embeddings'
+    vector_db_path ='model_embeddings'
 
     text_chunks = load_text_chunks_from_folder(CHUNK_OP_DIRECTORY_TXT)
     embeddings = embed_text_chunks(text_chunks, embedding_model)
+    vector_db_path = os.path.join(vector_db_path , chat_id  )
+    faiss_index_path = os.path.join(faiss_index_path ,chat_id  )
+    
+    os.makedirs(vector_db_path  ,exist_ok=True)
+    os.makedirs(faiss_index_path  ,exist_ok=True)
+    vector_db_path = os.path.join(vector_db_path  ,f"{chat_id}"  +"_embeddings.pkl")
+    faiss_index_path = os.path.join(faiss_index_path ,f"{chat_id}"  +"_faiss.index")
+
     save_embeddings(embeddings, text_chunks, vector_db_path)
 
     faiss_index = build_faiss_index(embeddings)
