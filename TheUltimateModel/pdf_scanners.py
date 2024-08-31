@@ -179,7 +179,7 @@ def process_book_page(book_path, book_name, page_num, chunk_number):
     os.remove(image_path)
 
 
-def extract_data_from_directory(data_directory):
+def extract_data_from_directory(data_directory , chat_id):
     data_root_directory = data_directory
     data_root_directory = os.path.abspath(data_root_directory)
     books_directory = os.listdir(data_root_directory)
@@ -203,15 +203,17 @@ def extract_data_from_directory(data_directory):
 
             book_file_name = os.path.basename(book_path) 
             book_name = os.path.splitext(book_file_name)[0]
-            DIRECTORY_FOR_BOOK_TEXT = os.path.join(EXTRACTED_TEXT_DIRECTORY, book_name + ".txt")
-            if not os.path.exists(EXTRACTED_TEXT_DIRECTORY):
-                os.makedirs(EXTRACTED_TEXT_DIRECTORY)
+            DIRECTORY_FOR_BOOK_TEX_CHATID = os.path.join(EXTRACTED_TEXT_DIRECTORY, chat_id)
+            os.makedirs(DIRECTORY_FOR_BOOK_TEX_CHATID ,exist_ok=True)
+            DIRECTORY_FOR_BOOK_TEXT = os.path.join(DIRECTORY_FOR_BOOK_TEX_CHATID, book_name + ".txt")
+            if not os.path.exists(DIRECTORY_FOR_BOOK_TEX_CHATID):
+                os.makedirs(DIRECTORY_FOR_BOOK_TEX_CHATID)
             with open(DIRECTORY_FOR_BOOK_TEXT, 'w', encoding='utf-8') as file:
                 file.write(text_of_the_entire_book)
             print(f"SAVED SUCCESSFUL IN THE PATH {DIRECTORY_FOR_BOOK_TEXT}")
                 # save_text_to_file(os.path.splitext(book)[0], page_num + 1, chunk_number, combined_text)
                 # chunk_number+=1
-    return DIRECTORY_FOR_BOOK_TEXT
+    return DIRECTORY_FOR_BOOK_TEX_CHATID
                 
 
 
