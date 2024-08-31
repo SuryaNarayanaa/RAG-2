@@ -1,2 +1,5 @@
 /JavaScriptServer/node_modules
 /JavaScriptServer/.env
+/model_embeddings
+/output
+/uploads
