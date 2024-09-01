@@ -7,13 +7,15 @@ import multer from 'multer';
 import path from 'path';
 import FormData from 'form-data';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
+import {promises as fs} from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT =3000;
+
 dotenv.config();
+
 const db = new pg.Client({
   user: process.env.user,
   host: process.env.host,
@@ -53,7 +55,7 @@ app.get("/",async(req,res)=>{
   if(chatnames.rows.length===0){
     chatnames = undefined;
   }
-  res.render("index.ejs", {
+  res.render("home.ejs", {
     chatnames:chatnames ? chatnames.rows : chatnames,
     chatname:undefined,
     chat:undefined,
@@ -103,7 +105,7 @@ app.get("/chatwithpdf",async (req,res)=>{
   if(chatnames.rows.length===0){
     chatnames = undefined;
   }
-  res.render("chatwithpdf.ejs", {
+  res.render("pdfchathome.ejs", {
     chatnames:chatnames ? chatnames.rows : chatnames,
     chatname:undefined,
     chat:undefined,
@@ -130,7 +132,6 @@ app.post("/chatwithpdf" , async (req,res)=>{
       question:message,
       chat_id:curr_chatid
     });
-    //must delete the pdf after the a response
     await db.query("insert into chatmesages (message,response,chatid) values ($1,$2,$3)",[message,response.data.response,chatid]);
     res.redirect(`/pdfchats?chatid=${chatid}`);
   }catch(error){
@@ -169,15 +170,16 @@ app.post('/uploadpdf', upload.single('pdfFile'), async (req, res) => {
     form.append('chat_id', chat_id);
     const response = await axios.post('https://gbrh7rr7-5000.inc1.devtunnels.ms/upload', form, {
       headers: {
-        ...form.getHeaders() // Include the form headers
+        ...form.getHeaders()
       },
-      timeout: 6000000
+      timeout: 600000
     });
+    await fs.unlink(filePath);
     res.redirect(`/pdfchats?chatid=${chat_id}`);
   } catch (error) {
-    console.error('Error sending file and chat_id to another API:', error);
-    res.status(500).send('Error sending file and chat_id to another API.');
+    console.error('Error sending file and chat_id to Flask Server:', error);
+    res.status(500).send('Error sending file to Flask Server');
   }
 });
 
-app.listen(PORT,()=>console.log('Server is running'));
+app.listen(PORT,()=>console.log(`Server is running on http://localhost:${PORT}`));
