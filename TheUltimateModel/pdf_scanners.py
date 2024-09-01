@@ -22,6 +22,8 @@ EXTRACTED_TEXT_DIRECTORY = "./output/text"
 
 
 
+
+
 # In[32]:
 
 
@@ -147,14 +149,14 @@ def preprocess_text(text):
 def extract_data_from_image(image_path):
  
     text = text_extractor(image_path)
-    extracted_images = extract_images_from_page(image_path)
+    #extracted_images = extract_images_from_page(image_path)
     
     
     combined_text = preprocess_text(text)
-    for (x, y, w, h, img_bytes) in extracted_images:
-        img_text = pytesseract.image_to_string(Image.open(io.BytesIO(img_bytes)), lang='eng')
-        img_description = describe_image(io.BytesIO(img_bytes))
-        combined_text += f"\n\n[Image at ({x},{y}) with size ({w}x{h})]: {img_text}\nDescription: {img_description}"
+    # for (x, y, w, h, img_bytes) in extracted_images:
+    #     img_text = pytesseract.image_to_string(Image.open(io.BytesIO(img_bytes)), lang='eng')
+    #     img_description = describe_image(io.BytesIO(img_bytes))
+    #     combined_text += f"\n\n[Image at ({x},{y}) with size ({w}x{h})]: {img_text}\nDescription: {img_description}"
     
     
     
@@ -180,6 +182,15 @@ def process_book_page(book_path, book_name, page_num, chunk_number):
 
 
 def extract_data_from_directory(data_directory , chat_id):
+    text_with_chat_id = os.path.join(EXTRACTED_TEXT_DIRECTORY , chat_id)
+    if os.path.exists(text_with_chat_id):
+        for f in os.listdir(text_with_chat_id):
+            f=  os.path.join(text_with_chat_id, f)
+            os.remove(f)
+
+
+
+    
     data_root_directory = data_directory
     data_root_directory = os.path.abspath(data_root_directory)
     books_directory = os.listdir(data_root_directory)

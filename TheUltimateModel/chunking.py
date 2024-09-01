@@ -18,7 +18,7 @@ from semantic_router.encoders import HuggingFaceEncoder
 # In[59]:
 
 
-CHUNK_OP_DIRECTORY_TXT = ".\\output\\chunks"
+CHUNK_OP_DIRECTORY_TXT = "./output/chunks"
 
 
 
@@ -57,15 +57,17 @@ def chunk_and_save_as_txt(text ,chat_id):
 
     chunks= chunker([text])
     splits = [chunk.splits for sublist in chunks for chunk in sublist]
+    
 
-    chuk_with_chat_id = os.path.join(CHUNK_OP_DIRECTORY_TXT , chat_id)
-    os.makedirs(chuk_with_chat_id ,exist_ok=True)
+    chuk_with_chat_id = os.path.join(CHUNK_OP_DIRECTORY_TXT, chat_id)
 
-    chmks_files= os.listdir(chuk_with_chat_id)
-    for f in chmks_files:
-        f = os.path.join(chuk_with_chat_id ,f)
-        os.remove(f)
+    if not os.path.exists(chuk_with_chat_id):
+        os.makedirs(chuk_with_chat_id)
 
+    # Remove all files in the directory
+    for filename in os.listdir(chuk_with_chat_id):
+        file_path = os.path.join(chuk_with_chat_id, filename)
+        os.remove(file_path) 
     for i , indv_chunk in enumerate(splits):
         CHUNK_PATH = os.path.join(chuk_with_chat_id , f"chunk_{i+1}.txt")
         with open(CHUNK_PATH , 'w') as f:
