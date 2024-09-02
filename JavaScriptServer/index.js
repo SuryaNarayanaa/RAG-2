@@ -7,7 +7,8 @@ import multer from 'multer';
 import path from 'path';
 import FormData from 'form-data';
 import { fileURLToPath } from 'url';
-import {promises as fs} from 'fs';
+//import {promises as fs} from 'fs';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -171,10 +172,9 @@ app.post('/uploadpdf', upload.single('pdfFile'), async (req, res) => {
     const response = await axios.post('https://gbrh7rr7-5000.inc1.devtunnels.ms/upload', form, {
       headers: {
         ...form.getHeaders()
-      },
-      timeout: 600000
+      }
     });
-    await fs.unlink(filePath);
+    //await fs.unlink(filePath);
     res.redirect(`/pdfchats?chatid=${chat_id}`);
   } catch (error) {
     console.error('Error sending file and chat_id to Flask Server:', error);
@@ -182,4 +182,19 @@ app.post('/uploadpdf', upload.single('pdfFile'), async (req, res) => {
   }
 });
 
-app.listen(PORT,()=>console.log(`Server is running on http://localhost:${PORT}`));
+app.post('/uploadimg', upload.single('imgfile'), (req, res) => {
+  try {
+    res.status(200).send({
+      message: 'Image uploaded successfully!',
+      file: req.file
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: 'Failed to upload image',
+      error: err.message
+    });
+  }
+});
+
+const server = app.listen(PORT,()=>console.log(`Server is running on http://localhost:${PORT}`));

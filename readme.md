@@ -7,13 +7,15 @@ BookGPT is an advanced Retrieval-Augmented Generation (RAG) system built using t
 
 ### Completed
 - ✅**Anatomy Books Integration:**
-  We have successfully added 3 anatomy books to the Retrieval-Augmented Generation (RAG) system. Users can now ask BookGPT questions related to these books.
+  We have successfully added 3 anatomy books (Vol 1, Vol 2, Vol 3) to the Retrieval-Augmented Generation (RAG) system. Users can now ask BookGPT questions related to these books.
+- ✅**PDF Upload Functionality:**
+  We successfully added custom PDF upload functionality that will allow users to upload any PDF file to BookGPT and ask questions about the content within it.
 
 ### Ongoing Progression
-- ⭕**PDF Upload Functionality:**
-  We are working on a feature that will allow users to upload any PDF file to BookGPT and ask questions about the content within it.
 - ⭕**Image Search Compatibility:**
   We are working on Image based retrieval of the content in the PDF file
+- ⭕**Generating Flowcharts:**
+  We are working on a feature that generates flowcharts to user prompts when it is enabled.
 
 ## Demo
 [Watch Demo](https://drive.google.com/file/d/11PfuL8QnYItnbMi0fu8Xk5yIBL1SjU5w/view?usp=sharing)
