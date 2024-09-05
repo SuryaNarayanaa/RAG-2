@@ -8,9 +8,20 @@ import os
 import pickle
 import numpy as np
 import faiss
+import torch
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from langchain_community.llms import Ollama
+
+
+
+from transformers import BlipProcessor, BlipForConditionalGeneration
+from PIL import Image
+
+# Initialize the BLIP model and processor
+processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+img_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+
 
 # Paths
 MODEL = "mistral"  # Use the Mistral model
@@ -19,6 +30,25 @@ model = Ollama(model=MODEL)
 text_chunks_folder = 'output/chunks/'
 faiss_index_path = 'model_embeddings/faiss_index.index'
 vector_db_path = 'model_embeddings/embeddings.pkl'
+
+
+
+
+def describe_image(image_path):
+    # Load and process the image
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(images=image, return_tensors="pt")
+
+    # Generate description
+    with torch.no_grad():
+        out = img_model.generate(**inputs)
+    
+    # Decode the generated text
+    description = processor.decode(out[0], skip_special_tokens=True)
+    return description
+
+
+
 
 def load_text_chunks_from_folder(folder_path):
     text_chunks = []
@@ -90,7 +120,9 @@ def search_faiss(query, index, model, k=5):
     D, I = index.search(np.array(query_embedding), k)  # Search for top-k similar embeddings
     return I[0]  # Returns the indices of the most similar chunks
 
-def retrieve_and_format_results(query, index, text_chunks, model):
+def retrieve_and_format_results(query, index, text_chunks, model , image = None):
+    if image:
+        query =query + "IMAGE QUERY : \n PROMPT : Just explain about the image, dont add anything to it. \n IMAGE : "+  describe_image(image)
     indices = search_faiss(query, index, model)
     
     # Handle case where no indices are returned
@@ -124,10 +156,10 @@ faiss_index = build_faiss_index(embeddings)
 
 
 # query = "what are DNA made up of, explain in detail with help of flowchart" 
-def return_formated_text(question):
+def return_formated_text(question, image = None):
 
     
-    formatted_results = retrieve_and_format_results(question, faiss_index, text_chunks, embedding_model)
+    formatted_results = retrieve_and_format_results(question, faiss_index, text_chunks, embedding_model, image)
     return formatted_results
 # print("RAG :(\n")
 # print(formatted_results)
