@@ -7,6 +7,7 @@ from TheUltimateModel.chunking import generate_chunks
 from TheUltimateModel.saveing_model_params import saving_the_model
 from TheUltimateModel.querying_from_the_model import retrieve_and_format_results, build_faiss_index, load_embeddings
 from update_embedding_path_to_DB import update_document_paths, get_document_paths
+from TheUltimateModel.handle_image_query import retrieve_text_by_image
 from searching import return_formated_text
 
 app = Flask(__name__)
@@ -18,13 +19,30 @@ ALLOWED_EXTENSIONS = {'pdf'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
 @app.route('/', methods=['POST'])
 def handle_question():
-    data = request.get_json()
-    question = data.get('question', '')
+    
+    
+    image = request.form.get('image') if request.form.get('image') else None
 
-    response_text = return_formated_text(question)
-    return jsonify({'response': response_text})
+    return_img =  request.form.get('return_img') if request.form.get('return_img') else None
+    return_flowchart =  request.form.get('return_flowchart') if request.form.get('return_flowchart') else None
+    
+
+
+
+    question = request.form.get('question')
+
+    if image:
+            
+        response_text = return_formated_text(question, image )
+        return jsonify({'response': response_text})
+    else:
+            
+        response_text = return_formated_text(question, image )
+        return jsonify({'response': response_text})
+        
 
 @app.route('/upload', methods=['POST'])
 def handle_upload():
@@ -78,6 +96,8 @@ def handle_chat():
     
     response_text = retrieve_and_format_results(question, faiss_index, text_chunks)
     return jsonify({'response': response_text})
+
+
 
 if __name__ == '__main__':
     logging.info("Starting the Flask app...")
