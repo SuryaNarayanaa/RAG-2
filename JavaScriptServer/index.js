@@ -7,7 +7,6 @@ import multer from 'multer';
 import path from 'path';
 import FormData from 'form-data';
 import { fileURLToPath } from 'url';
-//import {promises as fs} from 'fs';
 import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,6 +15,8 @@ const __dirname = path.dirname(__filename);
 const PORT =3000;
 
 dotenv.config();
+
+const flaskurl = "https://gbrh7rr7-5000.inc1.devtunnels.ms";
 
 const db = new pg.Client({
   user: process.env.user,
@@ -129,7 +130,7 @@ app.post("/chatwithpdf" , async (req,res)=>{
   const chatid = curr_chatid;
   const message = req.body.message;
   try{
-    const response = await axios.post("https://gbrh7rr7-5000.inc1.devtunnels.ms/upload/chat",{
+    const response = await axios.post(`${flaskurl}/upload/chat`,{
       question:message,
       chat_id:curr_chatid
     });
@@ -142,21 +143,24 @@ app.post("/chatwithpdf" , async (req,res)=>{
   }
 })
 
-app.post("/chat" , async (req,res)=>{
+app.post("/chat", upload.single('imgfile'), async (req, res) => {
   const chatid = curr_chatid;
   const message = req.body.message;
-  try{
-    const response = await axios.post("https://gbrh7rr7-5000.inc1.devtunnels.ms/",{
-      question:message,
-    });
-    await db.query("insert into chatmesages (message,response,chatid) values ($1,$2,$3)",[message,response.data.response,chatid]);
-    res.redirect(`/chats?chatid=${chatid}`);
-  }catch(error){
-    console.log(error);
-    res.render("error404.ejs" , {error : "Bad Request"});
+  const imgfile = req.file;
 
+  try {
+    const response = await axios.post(`${flaskurl}/`, {
+      question: message,
+      image: imgfile ? imgfile.path : null
+    });
+
+    await db.query("insert into chatmesages (message,response,chatid) values ($1,$2,$3)", [message, response.data.response, chatid]);
+    res.redirect(`/chats?chatid=${chatid}`);
+  } catch (error) {
+    console.log(error);
+    res.render("error404.ejs", { error: "Bad Request" });
   }
-})
+});
 
 app.post('/uploadpdf', upload.single('pdfFile'), async (req, res) => {
   if (!req.file) {
@@ -169,12 +173,12 @@ app.post('/uploadpdf', upload.single('pdfFile'), async (req, res) => {
     const form = new FormData();
     form.append('file', fs.createReadStream(filePath));
     form.append('chat_id', chat_id);
-    const response = await axios.post('https://gbrh7rr7-5000.inc1.devtunnels.ms/upload', form, {
+    const response = await axios.post(`${flaskurl}/upload`, form, {
       headers: {
         ...form.getHeaders()
       }
     });
-    //await fs.unlink(filePath);
+    fs.unlink(filePath);
     res.redirect(`/pdfchats?chatid=${chat_id}`);
   } catch (error) {
     console.error('Error sending file and chat_id to Flask Server:', error);
@@ -184,6 +188,9 @@ app.post('/uploadpdf', upload.single('pdfFile'), async (req, res) => {
 
 app.post('/uploadimg', upload.single('imgfile'), (req, res) => {
   try {
+
+    //sending image to the flask server and getting the response
+    //updating the database and chat
     res.status(200).send({
       message: 'Image uploaded successfully!',
       file: req.file
@@ -197,4 +204,4 @@ app.post('/uploadimg', upload.single('imgfile'), (req, res) => {
   }
 });
 
-const server = app.listen(PORT,()=>console.log(`Server is running on http://localhost:${PORT}`));
+app.listen(PORT,()=>console.log(`Server is running on http://localhost:${PORT}`));

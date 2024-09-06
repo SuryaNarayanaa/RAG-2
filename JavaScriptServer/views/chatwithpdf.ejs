@@ -87,6 +87,12 @@
             </form>
             <form class="chat-input" action="/chatwithpdf" method="post" id="inputsumbitform">
               <input type="text" id="userInput" required name="message" placeholder="Message BookGPT.." />
+              <button class="sendbutton" id="micbtn" onclick="startSpeechRecognition()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-mic-fill" viewBox="0 0 16 16">
+                  <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z"/>
+                  <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5"/>
+                </svg>
+              </button>
               <button id="sendButton" class="sendbutton" type="submit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
                   <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
@@ -105,9 +111,13 @@
       let sendbutton = document.querySelector("#sendButton");
       let uploadbtn = document.querySelector(".uploadbtn");
 
-      uploadbtn.addEventListener("click",()=>{
-        showLoadingSpinner();
-      })
+      window.onload = function() {
+        const chatBox = document.querySelector('.chat-box');
+        chatBox.scroll({
+          top: chatBox.scrollHeight,
+          behavior: 'smooth'
+        });
+      };
 
       sendbutton.addEventListener("click",()=>{
         showLoadingSpinner();
@@ -144,7 +154,28 @@
         fileInput.onchange = function() {
           if (fileInput.files.length > 0) {
             fileInput.form.submit();
+            showLoadingSpinner();
           }
+        };
+      }
+      function startSpeechRecognition() {
+        if (!('webkitSpeechRecognition' in window)) {
+          alert('Your browser does not support speech recognition. Please use a supported browser.');
+          return;
+        }
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.start();
+        recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript;
+          document.getElementById('userInput').value = transcript;
+        };
+        recognition.onend = function() {
+          console.log('Speech recognition ended.');
+        };
+        recognition.onerror = function(event) {
+          console.error('Speech recognition error:', event.error);
         };
       }
     </script>

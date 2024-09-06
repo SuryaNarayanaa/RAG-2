@@ -28,6 +28,7 @@ body {
   color: white;
   width: 100%;
   position: fixed;
+  background-color: #181717;
 }
 
 .sidebarbtn {
@@ -49,7 +50,7 @@ body {
   padding: 20px;
   transition: left 0.4s ease-in-out;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .sidebar ul {
@@ -86,6 +87,7 @@ body {
   overflow-y: auto;
   height: 75vh;
   width: 65%;
+  margin-top: 0.5rem;
 }
 
 .chat-message {
@@ -97,7 +99,6 @@ body {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 2rem;
-
 }
 
 .user-message p {
@@ -148,7 +149,7 @@ body {
 }
 
 .sendbutton {
-  background-color:#181717;
+  background-color: #181717;
   color: white;
   margin-top: 10px;
   border-radius: 50%;
@@ -157,21 +158,7 @@ body {
   cursor: pointer;
 }
 
-.uploadbtn{
-  color:white;
-  background-color: #181717;
-  border-radius: 50%;
-  padding: 10px 10px;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-}
-
-.error{
+.error {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -180,7 +167,7 @@ body {
   height: 80vh;
 }
 
-.nochat{
+.nochat {
   display: flex;
   width: 100%;
   height: 80vh;
@@ -199,7 +186,7 @@ body {
   transition: 0.5s;
 }
 
-.start-chat-btn:hover{
+.start-chat-btn:hover {
   background-color: white;
   color: black;
 }
@@ -209,26 +196,23 @@ body {
   height: 10px;
 }
 
-
 ::-webkit-scrollbar-track {
-  background:#181717;
+  background: #181717;
   border-radius: 10px;
 }
-
 
 ::-webkit-scrollbar-thumb {
   background-color: #363434;
   border-radius: 10px;
-  border:none;
+  border: none;
 }
-
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color:white;
+  background-color: white;
 }
 
-.sidebarinput{
-  background-color:#1a1a1b;
+.sidebarinput {
+  background-color: #1a1a1b;
   border: 1px solid white;
   color: white;
   height: 40px;
@@ -236,12 +220,12 @@ body {
   width: 200px;
 }
 
-.sidebarinput::-webkit-input-placeholder{
+.sidebarinput::-webkit-input-placeholder {
   color: white;
-  text-align:start;
+  text-align: start;
 }
 
-.createchatbtn{
+.createchatbtn {
   margin-top: 20px;
   margin-bottom: 20px;
   width: 120px;
@@ -250,46 +234,61 @@ body {
   border: none;
   border-radius: 40px;
   background-color: #555;
-  color:white;
+  color: white;
   transition: 0.5s;
   text-align: center;
   cursor: pointer;
 }
-.createchatbtn:hover{
+
+.createchatbtn:hover {
   background-color: white;
   color: black;
 }
 
 @media only screen and (max-width: 575.98px) {
-  .chat-box{
+  .chat-box {
     width: 100%;
     height: 70vh;
   }
-  .chat-input{
+  .chat-input {
     width: 90%;
   }
-  .bot-message p{
+  .bot-message p {
     max-width: 80%;
   }
-
 }
 
 @media only screen and (max-width: 767.98px) {
-  .chat-box{
+  .chat-box {
     width: 100%;
   }
-  .chat-input{
+  .chat-input {
     width: 90%;
   }
 }
 
-@media only screen and (max-width: 991.98px ) {
-  .chat-box{
+@media only screen and (max-width: 991.98px) {
+  .chat-box {
     width: 90%;
   }
-  .chat-input{
+  .chat-input {
     width: 90%;
   }
+}
+
+.uploadbtn{
+  color:white;
+  background-color: #181717;
+  border-radius: 50%;
+  padding: 10px 10px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-right: 2px;
 }
 
 .loading-spinner {
@@ -305,11 +304,15 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.review-button{
+.review-button {
   background-color: #555;
   color: white;
   width: 50px;
@@ -321,19 +324,20 @@ body {
   border-radius: 20px;
   transition: 0.5s;
 }
-.review-button:hover{
+
+.review-button:hover {
   background-color: white;
   color: black;
 }
 
-.review-form{
+.review-form {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-.review-input{
+.review-input {
   margin-top: 2rem;
   width: 60%;
   height: 50px;
@@ -345,7 +349,7 @@ body {
   font-size: 1rem;
 }
 
-.name-input{
+.name-input {
   margin-top: 2rem;
   width: 60%;
   height: 50px;
@@ -357,7 +361,7 @@ body {
   font-size: 1rem;
 }
 
-.chatwithpdfbtn{
+.chatwithpdfbtn {
   background-color: #555;
   color: white;
   width: 50px;
@@ -370,7 +374,82 @@ body {
   transition: 0.5s;
 }
 
-.chatwithpdfbtn:hover{
+.chatwithpdfbtn:hover {
   background-color: white;
   color: black;
+}
+
+.menu-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-top: 20px;
+  z-index: 1000;
+  margin-right: 0.3rem;
+  margin-bottom: 0.3rem;
+}
+
+.three-dots-menu {
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+
+.sliders {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: 2rem;
+  background-color: #333;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  margin-bottom: 2rem;
+  margin-left: 11.5rem;
+  width: 200px;
+}
+
+.slider_container {
+  display: flex;
+  flex-direction: row;
+  width: 100px;
+  justify-content: space-between;
+}
+
+.sliders label {
+  margin-bottom: 5px;
+  color: white;
+}
+
+.sliders input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 5px;
+  height: 5px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.sliders input[type="checkbox"]:checked {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+  position: relative;
+}
+
+.sliders input[type="checkbox"]:checked::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  left: 5px;
 }

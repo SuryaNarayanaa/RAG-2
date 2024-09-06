@@ -76,17 +76,39 @@
             <% } %>
           </div>
           <div class="chat-input">
-            <form action="/uploadimg" method="post" enctype="multipart/form-data">
-              <input type="file" id="imgFileInput" name="imgfile" accept="image/*" style="display: none;" required>
-              <button type="button" class="uploadbtn" onclick="triggerFileInput()">
+            <div class="menu-container">
+              <div class="three-dots-menu" id="three-dots-menu">
+                  &#x22EE;
+              </div>
+              <div class="sliders" id="sliders" style="display: none;">
+                <label class="enable-images">Include response with:</label>
+                <div class="slider_container">
+                  <input type="checkbox" id="enable-images" name="enable-images" />
+                  <label for="enable-images">Images</label>
+
+                </div>
+                <div class="slider_container">
+                  <input type="checkbox" id="enable-flowchart" name="enable-flowchart" />
+                  <label for="enable-flowchart">Flowchart</label>
+              </div>
+              </div>
+          </div>
+
+            <form class="chat-input" action="/chat" method="post" id="inputsumbitform">
+              <input type="file" id="imgFileInput" name="imgfile" accept="image/*" style="display: none;">
+              <button type="button" class="uploadbtn" style="margin-top: 0;" onclick="triggerFileInput()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-image" viewBox="0 0 16 16">
                   <path d="M6.502 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
                   <path d="M14 14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zM4 1a1 1 0 0 0-1 1v10l2.224-2.224a.5.5 0 0 1 .61-.075L8 11l2.157-3.02a.5.5 0 0 1 .76-.063L13 10V4.5h-2A1.5 1.5 0 0 1 9.5 3V1z"/>
                 </svg>
               </button>
-            </form>
-            <form class="chat-input" action="/chat" method="post" id="inputsumbitform">
               <input type="text" id="userInput" required name="message" placeholder="Message BookGPT.." />
+              <button class="sendbutton" id="micbtn" onclick="startSpeechRecognition()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-mic-fill" viewBox="0 0 16 16">
+                  <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z"/>
+                  <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5"/>
+                </svg>
+              </button>
               <button id="sendButton" class="sendbutton" type="submit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
                   <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
@@ -105,9 +127,14 @@
       let sendbutton = document.querySelector("#sendButton");
       let imgbtn = document.querySelector(".uploadbtn");
 
-      imgbtn.addEventListener("click",()=>{
-        showLoadingSpinner();
-      })
+      window.onload = function() {
+        const chatBox = document.querySelector('.chat-box');
+        chatBox.scroll({
+          top: chatBox.scrollHeight,
+          behavior: 'smooth'
+        });
+      };
+
       sendbutton.addEventListener("click",()=>{
         showLoadingSpinner();
       })
@@ -118,6 +145,10 @@
           send.submit();
         }
       })
+      function triggerFileInput() {
+        const fileInput = document.getElementById('imgFileInput');
+        fileInput.click();
+      }
       function showLoadingSpinner() {
         sendbutton.style.display = "none";
         loadingSpinner.style.display = "block";
@@ -136,16 +167,38 @@
       sidebar.classList.toggle('open');
       }
 
-      function triggerFileInput() {
-        const fileInput = document.getElementById('imgFileInput');
-        fileInput.click();
+      const threeDotsMenu = document.getElementById('three-dots-menu');
+      const sliders = document.getElementById('sliders');
 
-        fileInput.onchange = function() {
-          if (fileInput.files.length > 0) {
-            fileInput.form.submit();
-          }
+      threeDotsMenu.addEventListener('click', function() {
+        if (sliders.style.display === 'none') {
+          sliders.style.display = 'flex';
+        } else {
+          sliders.style.display = 'none';
+        }
+      });
+
+      function startSpeechRecognition() {
+        if (!('webkitSpeechRecognition' in window)) {
+          alert('Your browser does not support speech recognition. Please use a supported browser.');
+          return;
+        }
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.start();
+        recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript;
+          document.getElementById('userInput').value = transcript;
+        };
+        recognition.onend = function() {
+          console.log('Speech recognition ended.');
+        };
+        recognition.onerror = function(event) {
+          console.error('Speech recognition error:', event.error);
         };
       }
+
     </script>
 </body>
 </html>
