@@ -1,14 +1,17 @@
-from flask import Flask, render_template, request, jsonify, url_for, redirect
+from flask import Flask, render_template, request, jsonify, url_for, redirect , send_file
 from flask_cors import CORS
 import os
+from io import BytesIO
 import logging
 from TheUltimateModel.pdf_scanners import extract_data_from_directory
 from TheUltimateModel.chunking import generate_chunks
 from TheUltimateModel.saveing_model_params import saving_the_model
 from TheUltimateModel.querying_from_the_model import retrieve_and_format_results, build_faiss_index, load_embeddings
 from update_embedding_path_to_DB import update_document_paths, get_document_paths
-from TheUltimateModel.handle_image_query import retrieve_text_by_image
 from searching import return_formated_text
+
+
+from TheUltimateModel.handle_image_query import retrieve_images_by_image ,retrieve_images_by_text
 
 app = Flask(__name__)
 CORS(app)
@@ -33,6 +36,32 @@ def handle_question():
 
 
     question = request.form.get('question')
+
+
+    if return_img:
+        if return_img == "text":
+            images_queried = retrieve_images_by_text(question)
+            name_of_img_path = question[:len(question)-1]
+        else:
+            if image:
+
+                images_queried = retrieve_images_by_image(image)
+                name_of_img_path = image.filename
+
+
+
+
+        # Assuming images_queried is the Image object, convert it to bytes
+        image_bytes = BytesIO()
+        images_queried.save(image_bytes, format="PNG")  # Save the image to a BytesIO object in PNG format
+        image_bytes = image_bytes.getvalue()
+
+
+        with open(f"./retrieved_imgs/{name_of_img_path}.png", "wb") as f:
+            f.write(image_bytes)
+
+        return send_file(f"./retrieved_imgs/{name_of_img_path}.png", mimetype='image/png')
+
 
     if image:
 

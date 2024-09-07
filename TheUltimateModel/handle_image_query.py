@@ -59,7 +59,7 @@ def retrieve_text_by_image(query_image_path, image_embeddings, text_embeddings, 
 
 
 transform = preprocess
-def retrieve_images_by_text(query_text, image_embeddings =image_embeddings, model = model, tokenizer =tokenizer, device =device, top_n=2):
+def retrieve_images_by_text(query_text, image_embeddings =image_embeddings, model = model, tokenizer =tokenizer, device =device, top_n=4):
     text_tokens = tokenizer([query_text]).to(device)
     
     with torch.no_grad():
@@ -71,13 +71,34 @@ def retrieve_images_by_text(query_text, image_embeddings =image_embeddings, mode
     for img_name, embedding in image_embeddings.items():
         similarities[img_name] = cosine_similarity([text_embedding], [embedding])[0][0]
     
+    
     sorted_images = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
-    
-    # Load and return images
-    result_images = [(Image.open(os.path.join(image_folder, img_name)).convert("RGB"), similarity)
-                     for img_name, similarity in sorted_images[:top_n]]
-    
-    return result_images
+
+    # Load top N images
+    top_images = [Image.open(os.path.join(image_folder, sorted_images[i][0])).convert("RGB") for i in range(top_n)]
+
+    # Resize images to a common height while maintaining the aspect ratio
+    resized_images = []
+    common_height=256
+    for img in top_images:
+        # Calculate the new width while preserving the aspect ratio
+        aspect_ratio = img.width / img.height
+        new_width = int(common_height * aspect_ratio)
+        resized_images.append(img.resize((new_width, common_height)))
+
+    # Calculate the total width of the combined image
+    total_width = sum(img.width for img in resized_images)
+
+    # Create a new blank image with the total width and common height
+    combined_image = Image.new("RGB", (total_width, common_height))
+
+    # Paste the resized images side by side into the combined image
+    x_offset = 0
+    for img in resized_images:
+        combined_image.paste(img, (x_offset, 0))
+        x_offset += img.width
+
+    return combined_image
 
 
 
@@ -86,7 +107,7 @@ def retrieve_images_by_text(query_text, image_embeddings =image_embeddings, mode
 
 from sklearn.metrics.pairwise import cosine_similarity
 
-def retrieve_images_by_image(query_image_path, image_embeddings, model, transform, device, top_n=1):
+def retrieve_images_by_image(query_image_path,  image_embeddings =image_embeddings, model = model, tokenizer =tokenizer, device =device, top_n=4):
     query_image = Image.open(query_image_path).convert("RGB")
     query_image_tensor = transform(query_image).unsqueeze(0).to(device)
     
@@ -100,9 +121,29 @@ def retrieve_images_by_image(query_image_path, image_embeddings, model, transfor
         similarities[img_name] = cosine_similarity([query_embedding], [embedding])[0][0]
     
     sorted_images = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
-    
-    # Load and return images
-    result_images = [(Image.open(os.path.join(image_folder, img_name)).convert("RGB"), similarity)
-                     for img_name, similarity in sorted_images[:top_n]]
-    
-    return result_images
+
+    # Load top N images
+    top_images = [Image.open(os.path.join(image_folder, sorted_images[i][0])).convert("RGB") for i in range(top_n)]
+
+    # Resize images to a common height while maintaining the aspect ratio
+    resized_images = []
+    common_height=256
+    for img in top_images:
+        # Calculate the new width while preserving the aspect ratio
+        aspect_ratio = img.width / img.height
+        new_width = int(common_height * aspect_ratio)
+        resized_images.append(img.resize((new_width, common_height)))
+
+    # Calculate the total width of the combined image
+    total_width = sum(img.width for img in resized_images)
+
+    # Create a new blank image with the total width and common height
+    combined_image = Image.new("RGB", (total_width, common_height))
+
+    # Paste the resized images side by side into the combined image
+    x_offset = 0
+    for img in resized_images:
+        combined_image.paste(img, (x_offset, 0))
+        x_offset += img.width
+
+    return combined_image

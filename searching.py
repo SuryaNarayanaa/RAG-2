@@ -81,7 +81,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
 
-def format_output(context, question):
+def format_output(context, question, image = None):
     """
     Use Mistral model to generate formatted output.
     """
@@ -101,7 +101,7 @@ def format_output(context, question):
     """
 
     # Format the template with context and question
-    prompt_text = template.format(context=context, question=question)
+    prompt_text = template.format(context=context, question=question ,image = image)
 
     # Generate a response using the Mistral model
     response = model(prompt_text)
