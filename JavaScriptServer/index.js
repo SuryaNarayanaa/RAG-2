@@ -17,6 +17,7 @@ const PORT =3000;
 dotenv.config();
 
 const flaskurl = "https://gbrh7rr7-5000.inc1.devtunnels.ms";
+//http://127.0.0.1:5000
 
 const db = new pg.Client({
   user: process.env.user,
