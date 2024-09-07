@@ -81,27 +81,28 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
 
-def format_output(context, question):
+def format_output(context, question, image = None):
     """
     Use Mistral model to generate formatted output.
     """
     # Define the template
     template = """
-    Answer the question based on the context below. If you can't 
-    answer the question, reply "I don't know".
-    Only give me the answers based on the context below.
-    Only answer the question asked. Do not provide additional information.
-    Give a clear and concise answer.
-    
+    >>> POINTS TO REMEMBER BEFORE GENERATING THE OUTPUT
+        CONSIDER YOU ARE A CHATBOT WITH NO KNOWLEDGE.
+        YOU WILL GAIN KNOWLEDGE ONLY WITH THE INFORMATION/CONTEXT I GIVE YOU.
+        DON'T TRY TO ANSWER OUTSIDE OF THE INFORMATION I GIVE YOU.
+        GENERATE THE OUTPUTS IN A STRUCTURED MANNER.
+        IF THE ANSWER TO THE QUESTION IS OUT OF THE CONTEXT, THEN RETURN THAT "THE CONTEXT IS OUT OF THE KNOWLWDGE. NO RELEVANT INFORMATION FOUND"
 
+    >>> INFORMATION/CONTEXT : {context}
+    >>> QUERY : {question}
+    >>> IMAGE : {image}
 
-    Context: {context}
-
-    Question: {question}
+    if the image is none, dont talk or hallucinate about the image, just skip the part.
     """
 
     # Format the template with context and question
-    prompt_text = template.format(context=context, question=question)
+    prompt_text = template.format(context=context, question=question ,image = image)
 
     # Generate a response using the Mistral model
     response = model(prompt_text)
@@ -133,7 +134,7 @@ def retrieve_and_format_results(query, index, text_chunks, model , image = None)
     valid_indices = [i for i in indices if 0 <= i < len(text_chunks)]
     results = " ".join([text_chunks[i] for i in valid_indices])  # Concatenate retrieved chunks
     
-    formatted_results = format_output(results ,query)
+    formatted_results = format_output(results ,query, image = image)
     return formatted_results
 
 # Initialize models
