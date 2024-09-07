@@ -42,7 +42,7 @@ def describe_image(image_path):
     # Generate description
     with torch.no_grad():
         out = img_model.generate(**inputs)
-    
+
     # Decode the generated text
     description = processor.decode(out[0], skip_special_tokens=True)
     return description
@@ -87,12 +87,12 @@ def format_output(context, question):
     """
     # Define the template
     template = """
-    Answer the question based on the context below. If you can't 
+    Answer the question based on the context below. If you can't
     answer the question, reply "I don't know".
     Only give me the answers based on the context below.
     Only answer the question asked. Do not provide additional information.
     Give a clear and concise answer.
-    
+
 
 
     Context: {context}
@@ -124,7 +124,7 @@ def retrieve_and_format_results(query, index, text_chunks, model , image = None)
     if image:
         query =query + "IMAGE QUERY : \n PROMPT : Just explain about the image, dont add anything to it. \n IMAGE : "+  describe_image(image)
     indices = search_faiss(query, index, model)
-    
+
     # Handle case where no indices are returned
     if not indices.size:
         return "No relevant information found."
@@ -132,7 +132,7 @@ def retrieve_and_format_results(query, index, text_chunks, model , image = None)
     # Check for valid indices
     valid_indices = [i for i in indices if 0 <= i < len(text_chunks)]
     results = " ".join([text_chunks[i] for i in valid_indices])  # Concatenate retrieved chunks
-    
+
     formatted_results = format_output(results ,query)
     return formatted_results
 
@@ -155,10 +155,10 @@ faiss_index = build_faiss_index(embeddings)
 # In[2]:
 
 
-# query = "what are DNA made up of, explain in detail with help of flowchart" 
+# query = "what are DNA made up of, explain in detail with help of flowchart"
 def return_formated_text(question, image = None):
 
-    
+
     formatted_results = retrieve_and_format_results(question, faiss_index, text_chunks, embedding_model, image)
     return formatted_results
 # print("RAG :(\n")
@@ -166,7 +166,3 @@ def return_formated_text(question, image = None):
 
 
 # In[ ]:
-
-
-
-
