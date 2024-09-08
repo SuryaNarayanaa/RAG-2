@@ -43,7 +43,7 @@ def describe_image(image_path):
     # Generate description
     with torch.no_grad():
         out = img_model.generate(**inputs)
-
+    
     # Decode the generated text
     description = processor.decode(out[0], skip_special_tokens=True)
     return description
@@ -90,7 +90,6 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
         template = """
         >>> POINTS TO REMEMBER BEFORE GENERATING THE OUTPUT
         CONSIDER YOU ARE A CHATBOT WITH NO KNOWLEDGE.
-
         ***GENERATE ONLY A  THE OUTLINE FOR A FLOWCHART BASED ON THE GIVEN CONTEXT.***
         YOU WILL GAIN KNOWLEDGE ONLY WITH THE INFORMATION/CONTEXT I GIVE YOU.
         DON'T TRY TO ANSWER OUTSIDE OF THE INFORMATION I GIVE YOU.
@@ -111,7 +110,7 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
         response = model(prompt_text)
 
 
-
+        
 
 
 
@@ -139,7 +138,6 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
                     One path leading to an End node.
                     One path looping back to the Process node.
                     Ensure that:
-
                     
                     Nodes and edges do not have labels.
                     Do not use slashes or quotes in the code.
@@ -152,7 +150,6 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
                         ProcessNode
                         DecisionNode
                         EndNode
-
                         
                         StartNode -> ProcessNode
                         ProcessNode -> DecisionNode
@@ -160,7 +157,6 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
                         DecisionNode -> ProcessNode
                     }
                     Replace StartNode, ProcessNode, DecisionNode, and EndNode with appropriate node names based on the context.
-
                     Dont use the these name again in the code 
                         "StartNode
                         ProcessNode
@@ -168,7 +164,6 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
                         EndNode"
                 """+ f"""
                 FOLLOW THE ABOVE STRUCTURE FOR GENERATING THE GRAPHVIZ CODE
-
                 CONTEXT  : {response}                                   
                     """
         
@@ -178,7 +173,6 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
         response = model(prompt_text)
         # Return the formatted output
         return response
-
     
 
 
@@ -190,7 +184,6 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
         template = """
         >>> POINTS TO REMEMBER BEFORE GENERATING THE OUTPUT
         CONSIDER YOU ARE A CHATBOT WITH NO KNOWLEDGE.
-
         ***GENERATE ONLY A  THE OUTLINE FOR A CSV TABLE BASED ON THE GIVEN CONTEXT. NO MORE ADDITIONAL WORDS OR SENTENCES***
         YOU WILL GAIN KNOWLEDGE ONLY WITH THE INFORMATION/CONTEXT I GIVE YOU.
         DON'T TRY TO ANSWER OUTSIDE OF THE INFORMATION I GIVE YOU.
@@ -236,7 +229,6 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
                         Special Characters: Use quotation marks if your data contains commas or special characters.
                         Encoding: Save the CSV file in UTF-8 encoding to avoid issues with special characters.
                     CONTEXT : {response}
-
                     
                     
                     
@@ -247,7 +239,6 @@ def format_output(context, question= None, image = None, flowchart = False ,tabl
 
         response = model(prompt_text)
         return response
-
         
                     
     template = """
@@ -289,7 +280,7 @@ def retrieve_and_format_results(query, index, text_chunks, model , image = None 
     if image:
         query =query + "IMAGE QUERY : \n PROMPT : Just explain about the image, dont add anything to it. \n IMAGE : "+  describe_image(image)
     indices = search_faiss(query, index, model)
-
+    
     # Handle case where no indices are returned
     if not indices.size:
         return "No relevant information found."
@@ -297,7 +288,6 @@ def retrieve_and_format_results(query, index, text_chunks, model , image = None 
     # Check for valid indices
     valid_indices = [i for i in indices if 0 <= i < len(text_chunks)]
     results = " ".join([text_chunks[i] for i in valid_indices])  # Concatenate retrieved chunks
-
     
     formatted_results = format_output(results ,query, image = image , flowchart =flowchart , table= table)
     return formatted_results
@@ -321,7 +311,6 @@ faiss_index = build_faiss_index(embeddings)
 # In[2]:
 
 
-
 # query = "what are DNA made up of, explain in detail with help of flowchart" 
 def return_formated_text(question, image = None, flowchart = False ,table = False):
 
@@ -333,3 +322,7 @@ def return_formated_text(question, image = None, flowchart = False ,table = Fals
 
 
 # In[ ]:
+
+
+
+

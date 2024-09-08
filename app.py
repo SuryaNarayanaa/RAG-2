@@ -29,6 +29,11 @@ def allowed_file(filename):
 @app.route('/', methods=['POST'])
 def handle_question():
 
+    
+    
+    image = request.files.get('image') if request.files.get('image') else None
+
+
 
     image = request.files.get('image') if request.files.get('image') else None
 
@@ -38,9 +43,10 @@ def handle_question():
 
 
     return_img =  request.form.get('return_img') if request.form.get('return_img') else None
-    return_flowchart =  request.form.get('return_flowchart')
-    return_table = request.form.get("return_table")
 
+    return_flowchart =  request.form.get('return_flowchart') 
+    return_table = request.form.get("return_table")
+    
 
 
 
@@ -60,9 +66,6 @@ def handle_question():
 
 
 
-
-
-
         # Assuming images_queried is the Image object, convert it to bytes
         image_bytes = BytesIO()
         images_queried.save(image_bytes, format="PNG")  # Save the image to a BytesIO object in PNG format
@@ -74,9 +77,10 @@ def handle_question():
 
         return send_file(f"./retrieved_imgs/{name_of_img_path}.png", mimetype='image/png')
 
+    
     elif return_flowchart == 'true':
         mermaid_code = return_formated_text(question , flowchart = True)
-
+    
 
         flow_chart_path  = generate_flow_chart(mermaid_code , question)
 
@@ -97,14 +101,15 @@ def handle_question():
         # Return the image using send_file
         return send_file(BytesIO(image_data), mimetype='image/png', as_attachment=False)
 
+    
 
     elif return_table == 'true':
+        
 
         csv_text = return_formated_text(question , table = True)
 
         csv_file_path = create_csv(csv_text ,question)
         return send_file(csv_file_path, mimetype='text/csv', as_attachment= False)
-
 
 
     if image:

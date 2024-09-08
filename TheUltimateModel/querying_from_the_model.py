@@ -3,6 +3,9 @@
 
 # In[17]:
 
+import warnings
+warnings.filterwarnings("ignore")
+
 
 import os
 import pickle
