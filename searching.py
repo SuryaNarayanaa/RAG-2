@@ -3,6 +3,8 @@
 
 # In[1]:
 
+import warnings
+warnings.filterwarnings("ignore")
 
 import os
 import pickle
@@ -10,7 +12,6 @@ import numpy as np
 import faiss
 import torch
 from sentence_transformers import SentenceTransformer
-from transformers import AutoTokenizer, AutoModelForCausalLM
 from langchain_community.llms import Ollama
 
 
@@ -76,16 +77,71 @@ def build_faiss_index(embeddings):
     index.add(embeddings)  # Add embeddings to index
     return index
 
-from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
 
 
-def format_output(context, question, image = None):
-    """
-    Use Mistral model to generate formatted output.
-    """
-    # Define the template
+def format_output(context, question, image = None, flowchart = False):
+
+
+
+    if flowchart:
+
+        template = """PROMPT :GENERATE A SIMPLE GRAPHVIZ CODE FOR CREATING A FLOWCHART FOR THE CONTEXT BELOW. MAKE IT SIMPLE TO INTERPRET. 
+                    
+                                        Generate a Graphviz code template for a flowchart. Follow these guidelines:
+                    
+                    Start Node: The flowchart begins with a Start node.
+                    Process Node: Connect the Start node to a Process node.
+                    Decision Node: Connect the Process node to a Decision node.
+                    Decision Paths: The Decision node should have two outgoing paths:
+                    One path leading to an End node.
+                    One path looping back to the Process node.
+                    Ensure that:
+                    
+                    Nodes and edges do not have labels.
+                    Do not use slashes or quotes in the code.
+                    Here’s the general structure:
+                    
+                    plaintext
+                    Copy code
+                    digraph {
+                        StartNode
+                        ProcessNode
+                        DecisionNode
+                        EndNode
+                        
+                        StartNode -> ProcessNode
+                        ProcessNode -> DecisionNode
+                        DecisionNode -> EndNode
+                        DecisionNode -> ProcessNode
+                    }
+                    Replace StartNode, ProcessNode, DecisionNode, and EndNode with appropriate node names based on the context.
+                    Dont use the these name again in the code 
+                        "StartNode
+                        ProcessNode
+                        DecisionNode
+                        EndNode"
+                """+ f"""
+                   CONTEXT  : {context}
+
+
+
+                    NOTE: GENERATE ONLY THE GRAPHVIZ CODE FOR THE PROVIDED CONTEXT. USE THE PORPER SYNTAX
+                        USE THE SYNTAX ABOVE. NO EXTRA WORDS.
+                    
+                    
+                    
+                    
+                    """
+        
+        prompt_text = template
+
+        # Generate a response using the Mistral model
+        response = model(prompt_text)
+        # Return the formatted output
+        return response
+                    
     template = """
     >>> POINTS TO REMEMBER BEFORE GENERATING THE OUTPUT
         CONSIDER YOU ARE A CHATBOT WITH NO KNOWLEDGE.
@@ -121,7 +177,7 @@ def search_faiss(query, index, model, k=5):
     D, I = index.search(np.array(query_embedding), k)  # Search for top-k similar embeddings
     return I[0]  # Returns the indices of the most similar chunks
 
-def retrieve_and_format_results(query, index, text_chunks, model , image = None):
+def retrieve_and_format_results(query, index, text_chunks, model , image = None , flowchart = False):
     if image:
         query =query + "IMAGE QUERY : \n PROMPT : Just explain about the image, dont add anything to it. \n IMAGE : "+  describe_image(image)
     indices = search_faiss(query, index, model)
@@ -134,7 +190,7 @@ def retrieve_and_format_results(query, index, text_chunks, model , image = None)
     valid_indices = [i for i in indices if 0 <= i < len(text_chunks)]
     results = " ".join([text_chunks[i] for i in valid_indices])  # Concatenate retrieved chunks
     
-    formatted_results = format_output(results ,query, image = image)
+    formatted_results = format_output(results ,query, image = image , flowchart =flowchart)
     return formatted_results
 
 # Initialize models
@@ -157,10 +213,10 @@ faiss_index = build_faiss_index(embeddings)
 
 
 # query = "what are DNA made up of, explain in detail with help of flowchart" 
-def return_formated_text(question, image = None):
+def return_formated_text(question, image = None, flowchart = False):
 
     
-    formatted_results = retrieve_and_format_results(question, faiss_index, text_chunks, embedding_model, image)
+    formatted_results = retrieve_and_format_results(question, faiss_index, text_chunks, embedding_model, image ,flowchart )
     return formatted_results
 # print("RAG :(\n")
 # print(formatted_results)

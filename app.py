@@ -7,7 +7,9 @@ from TheUltimateModel.pdf_scanners import extract_data_from_directory
 from TheUltimateModel.chunking import generate_chunks
 from TheUltimateModel.saveing_model_params import saving_the_model
 from TheUltimateModel.querying_from_the_model import retrieve_and_format_results, build_faiss_index, load_embeddings
+from TheUltimateModel.generate_flowchart import generate_flow_chart
 from update_embedding_path_to_DB import update_document_paths, get_document_paths
+
 from searching import return_formated_text
 
 
@@ -27,7 +29,7 @@ def allowed_file(filename):
 def handle_question():
     
     
-    image = request.files.get('image')
+    image = request.files.get('image') if request.files.get('image') else None
 
     
     
@@ -35,7 +37,7 @@ def handle_question():
     
 
     return_img =  request.form.get('return_img') if request.form.get('return_img') else None
-    return_flowchart =  request.form.get('return_flowchart') if request.form.get('return_flowchart') else None
+    return_flowchart =  request.form.get('return_flowchart') 
     
 
 
@@ -53,6 +55,9 @@ def handle_question():
                 images_queried = retrieve_images_by_image(image)
                 name_of_img_path = image.filename
 
+    
+
+
         
 
 
@@ -66,6 +71,31 @@ def handle_question():
             f.write(image_bytes)
 
         return send_file(f"./retrieved_imgs/{name_of_img_path}.png", mimetype='image/png')
+    
+    elif return_flowchart == 'true':
+        mermaid_code = return_formated_text(question , flowchart = True)
+    
+
+        flow_chart_path  = generate_flow_chart(mermaid_code , question)
+
+        with open(f"{flow_chart_path}.png", "rb") as f:
+            image_data = f.read()
+
+        # Use BytesIO to create an in-memory byte stream
+        image_bytes = BytesIO(image_data)
+
+        # Optionally, use PIL to manipulate the image if needed
+        # image = Image.open(image_bytes)
+        # Do any processing with the image if required
+
+        # Write image back to BytesIO if needed
+        # image.save(image_bytes, format="PNG")
+        # image_bytes.seek(0)  # Reset the stream position to the beginning
+
+        # Return the image using send_file
+        return send_file(BytesIO(image_data), mimetype='image/png', as_attachment=False)
+            
+
         
 
     if image:
