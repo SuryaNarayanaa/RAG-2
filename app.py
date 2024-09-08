@@ -8,6 +8,7 @@ from TheUltimateModel.chunking import generate_chunks
 from TheUltimateModel.saveing_model_params import saving_the_model
 from TheUltimateModel.querying_from_the_model import retrieve_and_format_results, build_faiss_index, load_embeddings
 from TheUltimateModel.generate_flowchart import generate_flow_chart
+from TheUltimateModel.generate_csv import create_csv
 from update_embedding_path_to_DB import update_document_paths, get_document_paths
 
 from searching import return_formated_text
@@ -38,6 +39,7 @@ def handle_question():
 
     return_img =  request.form.get('return_img') if request.form.get('return_img') else None
     return_flowchart =  request.form.get('return_flowchart') 
+    return_table = request.form.get("return_table")
     
 
 
@@ -94,7 +96,14 @@ def handle_question():
 
         # Return the image using send_file
         return send_file(BytesIO(image_data), mimetype='image/png', as_attachment=False)
-            
+    
+
+    elif return_table == 'true':
+        
+        csv_text = return_formated_text(question , table = True)
+
+        csv_file_path = create_csv(csv_text ,question)
+        return send_file(csv_file_path, mimetype='text/csv', as_attachment= False)
 
         
 
