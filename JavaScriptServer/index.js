@@ -17,7 +17,7 @@ const PORT =3000;
 dotenv.config();
 
 const flaskurl = "https://gbrh7rr7-5000.inc1.devtunnels.ms";
-//http://127.0.0.1:5000
+//Localhost: http://127.0.0.1:5000
 
 const db = new pg.Client({
   user: process.env.user,
@@ -30,7 +30,7 @@ const db = new pg.Client({
 db.connect();
 
 db.query("create table if not exists chat (id serial primary key, chatname text);");
-db.query("create table if not exists chatmesages (id serial primary key, message text,response text,chatid integer references chat(id));");
+db.query("create table if not exists chatmesages (id serial primary key, message text,response text,chatid integer references chat(id),input_img bytea,output_img bytea,flowchart bytea);");
 db.query("create table if not exists reviews (id serial primary key, name text, review text);");
 
 const storage = multer.diskStorage({
@@ -48,6 +48,9 @@ let chat;
 let chatname;
 let chatnames;
 let curr_chatid;
+let input_img;
+let output_img;
+let flowchart;
 
 const app = express();
 app.use(express.static("public"));
@@ -78,14 +81,44 @@ app.post("/review",async (req,res)=>{
 app.get("/chats",async (req,res)=>{
   const {chatid} = req.query;
   curr_chatid = chatid;
+  input_img = await db.query("select input_img from chatmesages where chatid=$1",[chatid]);
+  output_img = await db.query("select output_img from chatmesages where chatid=$1",[chatid]);
+  flowchart = await db.query("select flowchart from chatmesages where chatid=$1",[chatid]);
   chat = await db.query("select * from chatmesages where chatid=$1",[chatid]);
-  if(chat.rows.length==0){
+  if (input_img.rows.length === 0) {
+    input_img = undefined;
+  } else {
+    input_img = input_img.rows.map(row =>{
+      return row.input_img ? row.input_img.toString('base64') : null;
+    });
+  }
+
+  if (output_img.rows.length === 0) {
+    output_img = undefined;
+  } else {
+    output_img = output_img.rows.map(row => {
+      return row.output_img ? row.output_img.toString('base64') : null;
+    });
+  }
+
+  if (flowchart.rows.length === 0) {
+    flowchart = undefined;
+  } else {
+    flowchart = flowchart.rows.map(row => {
+      return row.flowchart ? row.flowchart.toString('base64') : null;
+    });
+  }
+  if(chat.rows.length===0){
     chat = undefined;
   }
+
   res.render("index.ejs", {
     chatnames:chatnames ? chatnames.rows : chatnames,
     chatname: chatname ? chatname : undefined,
     chat: chat ? chat.rows : undefined,
+    input_img: input_img,
+    output_img: output_img,
+    flowchart: flowchart,
   });
 })
 
@@ -148,14 +181,70 @@ app.post("/chat", upload.single('imgfile'), async (req, res) => {
   const chatid = curr_chatid;
   const message = req.body.message;
   const imgfile = req.file;
+  const enableImages = req.body['enable-images'] === 'on';
+  const enableFlowchart = req.body['enable-flowchart'] === 'on';
+  let return_img = undefined;
+  let return_flowchart = undefined;
+
+  //For Debugging
+  console.log('Message:', message);
+  console.log('Enable Images:', enableImages);
+  console.log('Enable Flowchart:', enableFlowchart);
 
   try {
-    const response = await axios.post(`${flaskurl}/`, {
-      question: message,
-      image: imgfile ? imgfile.path : null
-    });
+    const form = new FormData();
+    form.append('question', message);
 
-    await db.query("insert into chatmesages (message,response,chatid) values ($1,$2,$3)", [message, response.data.response, chatid]);
+    if (imgfile) {
+      form.append('image', fs.createReadStream(imgfile.path));
+    }
+    if (enableImages && !imgfile) {
+      return_img = "text";
+    }
+    else if(enableImages && imgfile){
+      return_img = "image";
+    }
+
+    if(return_img){
+      form.append('return_img', return_img);
+    }
+    form.append('return_flowchart', enableFlowchart ? 'true' : 'false');
+
+    const inputImageData = imgfile ? fs.readFileSync(imgfile.path) : null;
+
+    if (message && imgfile && !(return_flowchart && return_img)) {
+      const response = await axios.post(`${flaskurl}/`, form, {
+        headers: form.getHeaders()
+      });
+      await db.query("INSERT INTO chatmesages (message, input_img, response, chatid) VALUES ($1, $2, $3, $4)", [message, inputImageData, response.data.response, chatid]);
+    } else if (enableImages && !imgfile) {
+      const response = await axios.post(`${flaskurl}/`,form, {
+        headers: form.getHeaders(),
+        responseType: 'arraybuffer'
+      });
+      const binaryData = Buffer.from(response.data);
+      await db.query("INSERT INTO chatmesages (message, chatid, output_img) VALUES ($1, $2, $3)", [message, chatid, binaryData]);
+    } else if (enableImages && imgfile) {
+      const response = await axios.post(`${flaskurl}/`,form, {
+        headers: form.getHeaders(),
+        responseType: 'arraybuffer'
+      });
+      const binaryData = Buffer.from(response.data);
+      await db.query("INSERT INTO chatmesages (chatid, input_img, output_img) VALUES ($1, $2, $3)", [chatid, inputImageData,binaryData]);
+    } else if (enableFlowchart) {
+      const response = await axios.post(`${flaskurl}/`,form, {
+        headers: form.getHeaders(),
+        responseType: 'arraybuffer'
+      });
+      const binaryData = Buffer.from(response.data);
+      await db.query("INSERT INTO chatmesages (message, chatid, flowchart) VALUES ($1, $2, $3)", [message, chatid, binaryData]);
+    } else {
+      const response = await axios.post(`${flaskurl}/`, form, {
+        headers: form.getHeaders()
+      });
+      await db.query("INSERT INTO chatmesages (message, response, chatid) VALUES ($1, $2, $3)", [message, response.data.response, chatid]);
+    }
+
     res.redirect(`/chats?chatid=${chatid}`);
   } catch (error) {
     console.log(error);
@@ -187,22 +276,11 @@ app.post('/uploadpdf', upload.single('pdfFile'), async (req, res) => {
   }
 });
 
-app.post('/uploadimg', upload.single('imgfile'), (req, res) => {
-  try {
-
-    //sending image to the flask server and getting the response
-    //updating the database and chat
-    res.status(200).send({
-      message: 'Image uploaded successfully!',
-      file: req.file
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      message: 'Failed to upload image',
-      error: err.message
-    });
-  }
+app.post("/deletechat",async (req,res)=>{
+  const {chatid} = req.body;
+  await db.query("delete from chatmesages where chatid=$1",[chatid]);
+  await db.query("delete from chat where id=$1",[chatid]);
+  res.redirect("/");
 });
 
 app.listen(PORT,()=>console.log(`Server is running on http://localhost:${PORT}`));

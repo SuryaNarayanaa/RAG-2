@@ -37,10 +37,19 @@
               <ul>
                 <% if(locals.chatnames){ %>
                   <% chatnames.forEach( obj=> {%>
-                    <li>
+                    <li style="display: flex;flex-direction: row;justify-content: space-between;">
                       <form action="/chats" method="get">
                         <input type="hidden" name="chatid" value="<%= obj.id %>">
                         <button type="submit" style="color: white;border: none;background-color:#1a1a1b;cursor: pointer;font-size: 1rem;"><%= obj.chatname %></button>
+                      </form>
+                      <form action="/deletechat" method="post">
+                        <input type="hidden" name="chatid" value="<%= obj.id %>">
+                        <button type="submit" style="background-color:#1a1a1b;border: none;justify-content: flex-end;">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                          </svg>
+                        </button>
                       </form>
                     </li>
                   <%}); %>
@@ -51,17 +60,30 @@
             </div>
             <% if(locals.chatnames){ %>
               <% if(locals.chat){ %>
-                <%chat.forEach(chatobj => {%>
+                <%for (let i = 0; i < chat.length; i++) {%>
                   <div class="chat-message user-message">
-                    <p><%= chatobj.message%></p>
+                    <% if(locals.chat && chat[i].message){ %>
+                      <p><%= chat[i].message %></p>
+                    <% } %>
+                    <% if (locals.input_img && input_img[i]) { %>
+                      <img src="data:image/png;base64,<%=input_img[i]%>">
+                    <% } %>
                   </div>
                   <div class="chat-message bot-message">
                     <svg style="margin-right: 1rem;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-book" viewBox="0 0 16 16">
                       <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/>
                     </svg>
-                    <p><%= chatobj.response %></p>
+                    <% if(locals.chat && chat[i].response){ %>
+                      <p><%= chat[i].response %></p>
+                    <% } %>
+                    <% if (locals.output_img && output_img[i]) { %>
+                      <img src="data:image/png;base64,<%=output_img[i]%>">
+                    <% } %>
+                    <% if (locals.flowchart && flowchart[i]) { %>
+                      <img src="data:image/png;base64,<%=flowchart[i]%>">
+                    <% } %>
                   </div>
-                <%}); %>
+                <%}; %>
               <% }else{ %>
                 <div class="nochat">
                   <p style="color: white;text-align: center;font-size: 2rem;font-weight:600;">Start Chatting with BookGPT</p>
@@ -76,25 +98,24 @@
             <% } %>
           </div>
           <div class="chat-input">
-            <div class="menu-container">
-              <div class="three-dots-menu" id="three-dots-menu">
+            <form class="chat-input" action="/chat" method="post" id="inputsumbitform" enctype="multipart/form-data">
+              <div class="menu-container">
+                <div class="three-dots-menu" id="three-dots-menu">
                   &#x22EE;
-              </div>
-              <div class="sliders" id="sliders" style="display: none;">
-                <label class="enable-images">Include response with:</label>
-                <div class="slider_container">
-                  <input type="checkbox" id="enable-images" name="enable-images" />
-                  <label for="enable-images">Images</label>
-
                 </div>
-                <div class="slider_container">
-                  <input type="checkbox" id="enable-flowchart" name="enable-flowchart" />
-                  <label for="enable-flowchart">Flowchart</label>
+                <div class="sliders" id="sliders" style="display: none;">
+                  <label class="enable-images">Include response with:</label>
+                  <div class="slider_container">
+                    <input type="checkbox" id="enable-images" name="enable-images" />
+                    <label for="enable-images">Images</label>
+                  </div>
+                  <div class="slider_container">
+                    <input type="checkbox" id="enable-flowchart" name="enable-flowchart" />
+                    <label for="enable-flowchart">Flowchart</label>
+                  </div>
+                </div>
               </div>
-              </div>
-          </div>
 
-            <form class="chat-input" action="/chat" method="post" id="inputsumbitform">
               <input type="file" id="imgFileInput" name="imgfile" accept="image/*" style="display: none;">
               <button type="button" class="uploadbtn" style="margin-top: 0;" onclick="triggerFileInput()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-image" viewBox="0 0 16 16">
@@ -102,7 +123,7 @@
                   <path d="M14 14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zM4 1a1 1 0 0 0-1 1v10l2.224-2.224a.5.5 0 0 1 .61-.075L8 11l2.157-3.02a.5.5 0 0 1 .76-.063L13 10V4.5h-2A1.5 1.5 0 0 1 9.5 3V1z"/>
                 </svg>
               </button>
-              <input type="text" id="userInput" required name="message" placeholder="Message BookGPT.." />
+              <input type="text" id="userInput" name="message" placeholder="Message BookGPT.." />
               <button class="sendbutton" id="micbtn" onclick="startSpeechRecognition()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-mic-fill" viewBox="0 0 16 16">
                   <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z"/>
