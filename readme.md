@@ -5,13 +5,23 @@ BookGPT is an advanced Retrieval-Augmented Generation (RAG) system built using t
 
 ## Features
 
-### Completed
-- **Anatomy Books Integration:**
-  We have successfully added 3 anatomy books to the Retrieval-Augmented Generation (RAG) system. Users can now ask BookGPT questions related to these books.
+### Available Features :
+- ✅**Anatomy Books Integration :**
+  We have successfully added 3 anatomy books (Vol 1, Vol 2, Vol 3) to the Retrieval-Augmented Generation (RAG) system. Users can now ask BookGPT questions related to these books.
+- ✅**Chat with PDF :**
+  We successfully added custom PDF upload functionality that will allow users to upload any PDF file to BookGPT and ask questions about the content within it.
+- ✅**Image Search Compatibility :**
+  We successfully added Image based retrieval of the content in the PDF file
+- ✅**Generating Flowcharts :**
+  We successfully added the feature that generates flowcharts to user prompts when it is enabled.
 
-### Ongoing Progression
-- **PDF Upload Functionality:**
-  We are working on a feature that will allow users to upload any PDF file to BookGPT and ask questions about the content within it.
+### Ongoing Progression :
+
+- ⭕**Remembering Chat History :**
+  We are working on this feature where the model remebers the chat history. This makes the conversation more interactive
+- ⭕**Table Generation :**
+  We are working on this feature. It generates tabular data base on the given context.
+
 
 ## Demo
 [Watch Demo](https://drive.google.com/file/d/11PfuL8QnYItnbMi0fu8Xk5yIBL1SjU5w/view?usp=sharing)
@@ -28,8 +38,8 @@ BookGPT is an advanced Retrieval-Augmented Generation (RAG) system built using t
   - PostgreSQL
   - Python 3.9
   - Ollama
-  
-  
+
+
 ### Clone the repository
   ```
   git clone https://github.com/surya54101q/RAG-2.git
@@ -66,13 +76,13 @@ BookGPT is an advanced Retrieval-Augmented Generation (RAG) system built using t
 
 ### Installing Backend
 
-  - Intstall python version 3.9 
-  
+  - Intstall python version 3.9
+
   - Create a virtual environment
 
   - To install all the dependencies
     ```
-        pip install requirements.txt
+    pip install requirements.txt
     ```
   - To start the backend server
     ```

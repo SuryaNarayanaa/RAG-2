@@ -15,16 +15,16 @@
             </svg>
           </button>
             <h1><a style="text-decoration: none; color: white;" href="/">BookGPT</a></h1>
-            <a href="/chatwithpdf" class="chatwithpdfbtn">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4" width="16" height="16">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            <a href="/" class="chatwithpdfbtn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="16" height="16">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
               </svg>
             </a>
-            <a href="/review" class="review-button">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="16" height="16">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-            </svg>
-            </a>
+              <a href="/review" class="review-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="16" height="16">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                </svg>
+              </a>
         </div>
         <div class="chat-box-wrapper">
           <div class="chat-box">
@@ -37,8 +37,8 @@
               <ul>
                 <% if(locals.chatnames){ %>
                   <% chatnames.forEach( obj=> {%>
-                    <li style="display: flex;flex-direction: row;justify-content: space-between;">
-                      <form action="/chats" method="get">
+                    <li  style="display: flex;flex-direction: row;justify-content: space-between;">
+                      <form action="/pdfchats" method="get">
                         <input type="hidden" name="chatid" value="<%= obj.id %>">
                         <button type="submit" style="color: white;border: none;background-color:#1a1a1b;cursor: pointer;font-size: 1rem;"><%= obj.chatname %></button>
                       </form>
@@ -82,33 +82,6 @@
                     <% if (locals.flowchart && flowchart[i]) { %>
                       <img src="data:image/png;base64,<%=flowchart[i]%>">
                     <% } %>
-                    <% if(locals.csv_data && csv_data[i].csv_data){ %>
-                      <table border="1">
-                        <%
-                          const rows = csv_data[i].csv_data.split('\n');
-                          rows.forEach((row, rowIndex) => {
-                            const cols = row.split(',');
-                            if (rowIndex === 0) { %>
-                              <thead>
-                                <tr>
-                                  <% cols.forEach(col => { %>
-                                    <th><%= col.trim() %></th>
-                                  <% }); %>
-                                </tr>
-                              </thead>
-                            <% } else { %>
-                              <tbody>
-                                <tr>
-                                  <% cols.forEach(col => { %>
-                                    <td><%= col.trim() %></td>
-                                  <% }); %>
-                                </tr>
-                              </tbody>
-                            <% }
-                          });
-                        %>
-                      </table>
-                    <% } %>
                   </div>
                 <%}; %>
               <% }else{ %>
@@ -125,36 +98,17 @@
             <% } %>
           </div>
           <div class="chat-input">
-            <form class="chat-input" action="/chat" method="post" id="inputsumbitform" enctype="multipart/form-data">
-              <div class="menu-container">
-                <div class="three-dots-menu" id="three-dots-menu">
-                  &#x22EE;
-                </div>
-                <div class="sliders" id="sliders" style="display: none;">
-                  <label class="enable-images">Include response with:</label>
-                  <div class="slider_container">
-                    <input type="checkbox" id="enable-images" name="enable-images" />
-                    <label for="enable-images">Images</label>
-                  </div>
-                  <div class="slider_container">
-                    <input type="checkbox" id="enable-flowchart" name="enable-flowchart" />
-                    <label for="enable-flowchart">Flowchart</label>
-                  </div>
-                  <div class="slider_container">
-                    <input type="checkbox" id="enable-table" name="enable-table" />
-                    <label for="enable-table">Table</label>
-                  </div>
-                </div>
-              </div>
-
-              <input type="file" id="imgFileInput" name="imgfile" accept="image/*" style="display: none;">
-              <button type="button" class="uploadbtn" style="margin-top: 0;" onclick="triggerFileInput()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-image" viewBox="0 0 16 16">
-                  <path d="M6.502 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
-                  <path d="M14 14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zM4 1a1 1 0 0 0-1 1v10l2.224-2.224a.5.5 0 0 1 .61-.075L8 11l2.157-3.02a.5.5 0 0 1 .76-.063L13 10V4.5h-2A1.5 1.5 0 0 1 9.5 3V1z"/>
+            <form action="/uploadpdf" method="post" enctype="multipart/form-data">
+              <input type="file" id="pdfFileInput" name="pdfFile" accept="application/pdf" style="display: none;" required>
+              <button type="button" class="uploadbtn" onclick="triggerFileInput()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-arrow-up" viewBox="0 0 16 16">
+                  <path d="M8.5 11.5a.5.5 0 0 1-1 0V7.707L6.354 8.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 7.707z"/>
+                  <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
                 </svg>
               </button>
-              <input type="text" id="userInput" name="message" placeholder="Message BookGPT.." />
+            </form>
+            <form class="chat-input" action="/chatwithpdf" method="post" id="inputsumbitform">
+              <input type="text" id="userInput" required name="message" placeholder="Message BookGPT.." />
               <button class="sendbutton" id="micbtn" onclick="startSpeechRecognition()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-mic-fill" viewBox="0 0 16 16">
                   <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z"/>
@@ -177,7 +131,7 @@
       let send = document.querySelector("#inputsubmitform");
       let loadingSpinner = document.getElementById("loadingSpinner");
       let sendbutton = document.querySelector("#sendButton");
-      let imgbtn = document.querySelector(".uploadbtn");
+      let uploadbtn = document.querySelector(".uploadbtn");
 
       window.onload = function() {
         const chatBox = document.querySelector('.chat-box');
@@ -197,10 +151,6 @@
           send.submit();
         }
       })
-      function triggerFileInput() {
-        const fileInput = document.getElementById('imgFileInput');
-        fileInput.click();
-      }
       function showLoadingSpinner() {
         sendbutton.style.display = "none";
         loadingSpinner.style.display = "block";
@@ -219,17 +169,17 @@
       sidebar.classList.toggle('open');
       }
 
-      const threeDotsMenu = document.getElementById('three-dots-menu');
-      const sliders = document.getElementById('sliders');
+      function triggerFileInput() {
+        const fileInput = document.getElementById('pdfFileInput');
+        fileInput.click();
 
-      threeDotsMenu.addEventListener('click', function() {
-        if (sliders.style.display === 'none') {
-          sliders.style.display = 'flex';
-        } else {
-          sliders.style.display = 'none';
-        }
-      });
-
+        fileInput.onchange = function() {
+          if (fileInput.files.length > 0) {
+            fileInput.form.submit();
+            showLoadingSpinner();
+          }
+        };
+      }
       function startSpeechRecognition() {
         if (!('webkitSpeechRecognition' in window)) {
           alert('Your browser does not support speech recognition. Please use a supported browser.');
@@ -250,7 +200,6 @@
           console.error('Speech recognition error:', event.error);
         };
       }
-
     </script>
 </body>
 </html>
