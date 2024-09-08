@@ -3,6 +3,8 @@
 
 # In[1]:
 
+import warnings
+warnings.filterwarnings("ignore")
 
 import os
 import pickle
@@ -10,7 +12,6 @@ import numpy as np
 import faiss
 import torch
 from sentence_transformers import SentenceTransformer
-from transformers import AutoTokenizer, AutoModelForCausalLM
 from langchain_community.llms import Ollama
 
 
@@ -76,28 +77,183 @@ def build_faiss_index(embeddings):
     index.add(embeddings)  # Add embeddings to index
     return index
 
-from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
 
 
-def format_output(context, question, image = None):
-    """
-    Use Mistral model to generate formatted output.
-    """
-    # Define the template
+def format_output(context, question= None, image = None, flowchart = False ,table = False):
+
+
+
+    if flowchart:
+
+        template = """
+        >>> POINTS TO REMEMBER BEFORE GENERATING THE OUTPUT
+        CONSIDER YOU ARE A CHATBOT WITH NO KNOWLEDGE.
+        **GENERATE ONLY A  THE OUTLINE FOR A FLOWCHART BASED ON THE GIVEN CONTEXT.**
+        YOU WILL GAIN KNOWLEDGE ONLY WITH THE INFORMATION/CONTEXT I GIVE YOU.
+        DON'T TRY TO ANSWER OUTSIDE OF THE INFORMATION I GIVE YOU.
+        GENERATE THE OUTPUTS IN A STRUCTURED MANNER.
+        IF THE ANSWER TO THE QUESTION IS OUT OF THE CONTEXT, THEN RETURN THAT "THE CONTEXT IS OUT OF THE KNOWLWDGE. NO RELEVANT INFORMATION FOUND"
+
+        >>> INFORMATION/CONTEXT : {context}
+        >>> QUERY : {question}
+        >>> IMAGE : {image}
+
+        if the image is none, dont talk or hallucinate about the image, just skip the part.
+        """
+
+        # Format the template with context and question
+        prompt_text = template.format(context=context, question=question ,image = image)
+
+        # Generate a response using the Mistral model
+        response = model(prompt_text)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        template = """PROMPT :GENERATE A SIMPLE GRAPHVIZ CODE FOR CREATING A FLOWCHART FOR THE CONTEXT BELOW.
+
+                    Generate a Graphviz code template for a flowchart. Follow these guidelines:
+
+                    Start Node: The flowchart begins with a Start node.
+                    Process Node: Connect the Start node to a Process node.
+                    Decision Node: Connect the Process node to a Decision node.
+                    Decision Paths: The Decision node should have two outgoing paths:
+                    One path leading to an End node.
+                    One path looping back to the Process node.
+                    Ensure that:
+
+                    Nodes and edges do not have labels.
+                    Do not use slashes or quotes in the code.
+
+                    Here’s the general structure:
+
+
+                    digraph {
+                        StartNode
+                        ProcessNode
+                        DecisionNode
+                        EndNode
+
+                        StartNode -> ProcessNode
+                        ProcessNode -> DecisionNode
+                        DecisionNode -> EndNode
+                        DecisionNode -> ProcessNode
+                    }
+                    Replace StartNode, ProcessNode, DecisionNode, and EndNode with appropriate node names based on the context.
+                    Dont use the these name again in the code
+                        "StartNode
+                        ProcessNode
+                        DecisionNode
+                        EndNode"
+                """+ f"""
+                FOLLOW THE ABOVE STRUCTURE FOR GENERATING THE GRAPHVIZ CODE
+                CONTEXT  : {response}
+                    """
+
+        prompt_text = template
+
+        # Generate a response using the Mistral model
+        response = model(prompt_text)
+        # Return the formatted output
+        return response
+
+
+
+
+    if table:
+
+
+
+        template = """
+        >>> POINTS TO REMEMBER BEFORE GENERATING THE OUTPUT
+        CONSIDER YOU ARE A CHATBOT WITH NO KNOWLEDGE.
+        **GENERATE ONLY A  THE OUTLINE FOR A CSV TABLE BASED ON THE GIVEN CONTEXT. NO MORE ADDITIONAL WORDS OR SENTENCES**
+        YOU WILL GAIN KNOWLEDGE ONLY WITH THE INFORMATION/CONTEXT I GIVE YOU.
+        DON'T TRY TO ANSWER OUTSIDE OF THE INFORMATION I GIVE YOU.
+        GENERATE THE OUTPUTS IN A STRUCTURED MANNER.
+        IF THE ANSWER TO THE QUESTION IS OUT OF THE CONTEXT, THEN RETURN THAT "THE CONTEXT IS OUT OF THE KNOWLWDGE. NO RELEVANT INFORMATION FOUND"
+
+        >>> INFORMATION/CONTEXT : {context}
+        >>> QUERY : {question}
+        >>> IMAGE : {image}
+
+        if the image is none, dont talk or hallucinate about the image, just skip the part.
+        """
+
+        # Format the template with context and question
+        prompt_text = template.format(context=context, question=question ,image = image)
+
+        # Generate a response using the Mistral model
+        response = model(prompt_text)
+
+
+
+
+        template = f"""PROMPT :GENERATE A CSV (COMMA SEPARATED VALUES) FOR THE CONTEXT GIVEN BELOW
+                    Simple CSV Format
+                        Headers: Include column headers to clearly define the data.
+                        Data: Ensure that each row follows the same structure as defined by the headers.
+                        Example CSV Content
+                        Here’s a sample CSV content you can use:
+
+                       >>>
+                        Type,Name,Location,Function
+                        Multipolar,Pyramidal cell,Cerebral cortex,Plays a crucial role in various brain functions such as learning, memory, and cognition
+                        Multipolar,Purkinje cell,Cerebellar cortex,Involved in motor coordination and balance
+                        Unipolar sensory ganglion cells,N/A,Olfactory epithelium and olfactory bulbs,Responsible for detecting odors and transmitting this information to the brain
+                        Bipolar,N/A,N/A,Receives sensory input from the body and transmits it to the central nervous system
+                        Anaxonic (Multipolar),N/A,Central Nervous System,Research suggests they may exist but are not easily visible under standard microscopic resolution, have multiple processes and can function as an axon depending on conditions
+                        Glial,Astrocyte,CNS,Supports neurons by providing nutrients, removing waste, maintaining the blood-brain barrier, and modulating the release of neurotransmitters
+                        Glial,Oligodendrocyte,CNS (primarily in the white matter),Produces myelin sheaths that insulate axons, speeding up electrical impulses
+                        Glial,Microglia,CNS,Act as immune cells of the brain, phagocytosing damaged neurons and foreign substances
+                        >>>
+                        Notes
+                        Consistency: Ensure that all rows adhere to the same format.
+                        Special Characters: Use quotation marks if your data contains commas or special characters.
+                        Encoding: Save the CSV file in UTF-8 encoding to avoid issues with special characters.
+                    CONTEXT : {response}
+
+
+
+
+                    """
+
+        prompt_text = template
+
+        response = model(prompt_text)
+        return response
+
+
     template = """
-    Answer the question based on the context below. If you can't
-    answer the question, reply "I don't know".
-    Only give me the answers based on the context below.
-    Only answer the question asked. Do not provide additional information.
-    Give a clear and concise answer.
+    >>> POINTS TO REMEMBER BEFORE GENERATING THE OUTPUT
+        CONSIDER YOU ARE A CHATBOT WITH NO KNOWLEDGE.
+        YOU WILL GAIN KNOWLEDGE ONLY WITH THE INFORMATION/CONTEXT I GIVE YOU.
+        DON'T TRY TO ANSWER OUTSIDE OF THE INFORMATION I GIVE YOU.
+        GENERATE THE OUTPUTS IN A STRUCTURED MANNER.
+        IF THE ANSWER TO THE QUESTION IS OUT OF THE CONTEXT, THEN RETURN THAT "THE CONTEXT IS OUT OF THE KNOWLWDGE. NO RELEVANT INFORMATION FOUND"
 
+    >>> INFORMATION/CONTEXT : {context}
+    >>> QUERY : {question}
+    >>> IMAGE : {image}
 
-
-    Context: {context}
-
-    Question: {question}
+    if the image is none, dont talk or hallucinate about the image, just skip the part.
     """
 
     # Format the template with context and question
@@ -120,7 +276,7 @@ def search_faiss(query, index, model, k=5):
     D, I = index.search(np.array(query_embedding), k)  # Search for top-k similar embeddings
     return I[0]  # Returns the indices of the most similar chunks
 
-def retrieve_and_format_results(query, index, text_chunks, model , image = None):
+def retrieve_and_format_results(query, index, text_chunks, model , image = None , flowchart = False ,table = False):
     if image:
         query =query + "IMAGE QUERY : \n PROMPT : Just explain about the image, dont add anything to it. \n IMAGE : "+  describe_image(image)
     indices = search_faiss(query, index, model)
@@ -133,7 +289,7 @@ def retrieve_and_format_results(query, index, text_chunks, model , image = None)
     valid_indices = [i for i in indices if 0 <= i < len(text_chunks)]
     results = " ".join([text_chunks[i] for i in valid_indices])  # Concatenate retrieved chunks
 
-    formatted_results = format_output(results ,query)
+    formatted_results = format_output(results ,query, image = image , flowchart =flowchart , table= table)
     return formatted_results
 
 # Initialize models
@@ -156,10 +312,10 @@ faiss_index = build_faiss_index(embeddings)
 
 
 # query = "what are DNA made up of, explain in detail with help of flowchart"
-def return_formated_text(question, image = None):
+def return_formated_text(question, image = None, flowchart = False ,table = False):
 
 
-    formatted_results = retrieve_and_format_results(question, faiss_index, text_chunks, embedding_model, image)
+    formatted_results = retrieve_and_format_results(question, faiss_index, text_chunks, embedding_model, image ,flowchart  ,table )
     return formatted_results
 # print("RAG :(\n")
 # print(formatted_results)

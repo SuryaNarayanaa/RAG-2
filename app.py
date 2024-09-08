@@ -7,13 +7,16 @@ from TheUltimateModel.pdf_scanners import extract_data_from_directory
 from TheUltimateModel.chunking import generate_chunks
 from TheUltimateModel.saveing_model_params import saving_the_model
 from TheUltimateModel.querying_from_the_model import retrieve_and_format_results, build_faiss_index, load_embeddings
+from TheUltimateModel.generate_flowchart import generate_flow_chart
+from TheUltimateModel.generate_csv import create_csv
 from update_embedding_path_to_DB import update_document_paths, get_document_paths
+
 from searching import return_formated_text
 
 
 from TheUltimateModel.handle_image_query import retrieve_images_by_image ,retrieve_images_by_text
 
-app = Flask(__name__)
+app = Flask(_name_)
 CORS(app)
 
 UPLOAD_FOLDER = 'uploads/'
@@ -27,10 +30,16 @@ def allowed_file(filename):
 def handle_question():
 
 
-    image = request.form.get('image') if request.form.get('image') else None
+    image = request.files.get('image') if request.files.get('image') else None
+
+
+
+
+
 
     return_img =  request.form.get('return_img') if request.form.get('return_img') else None
-    return_flowchart =  request.form.get('return_flowchart') if request.form.get('return_flowchart') else None
+    return_flowchart =  request.form.get('return_flowchart')
+    return_table = request.form.get("return_table")
 
 
 
@@ -51,6 +60,9 @@ def handle_question():
 
 
 
+
+
+
         # Assuming images_queried is the Image object, convert it to bytes
         image_bytes = BytesIO()
         images_queried.save(image_bytes, format="PNG")  # Save the image to a BytesIO object in PNG format
@@ -62,15 +74,48 @@ def handle_question():
 
         return send_file(f"./retrieved_imgs/{name_of_img_path}.png", mimetype='image/png')
 
+    elif return_flowchart == 'true':
+        mermaid_code = return_formated_text(question , flowchart = True)
+
+
+        flow_chart_path  = generate_flow_chart(mermaid_code , question)
+
+        with open(f"{flow_chart_path}.png", "rb") as f:
+            image_data = f.read()
+
+        # Use BytesIO to create an in-memory byte stream
+        image_bytes = BytesIO(image_data)
+
+        # Optionally, use PIL to manipulate the image if needed
+        # image = Image.open(image_bytes)
+        # Do any processing with the image if required
+
+        # Write image back to BytesIO if needed
+        # image.save(image_bytes, format="PNG")
+        # image_bytes.seek(0)  # Reset the stream position to the beginning
+
+        # Return the image using send_file
+        return send_file(BytesIO(image_data), mimetype='image/png', as_attachment=False)
+
+
+    elif return_table == 'true':
+
+        csv_text = return_formated_text(question , table = True)
+
+        csv_file_path = create_csv(csv_text ,question)
+        return send_file(csv_file_path, mimetype='text/csv', as_attachment= False)
+
+
 
     if image:
 
-        response_text = return_formated_text(question, image )
+        response_text = return_formated_text(question, image)
         return jsonify({'response': response_text})
     else:
 
         response_text = return_formated_text(question, image )
         return jsonify({'response': response_text})
+
 
 
 @app.route('/upload', methods=['POST'])
@@ -128,7 +173,7 @@ def handle_chat():
 
 
 
-if __name__ == '__main__':
+if _name_ == '_main_':
     logging.info("Starting the Flask app...")
     if not os.path.exists(UPLOAD_FOLDER):
         logging.info("Creating upload folder...")
