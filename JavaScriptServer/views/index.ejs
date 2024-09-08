@@ -82,6 +82,33 @@
                     <% if (locals.flowchart && flowchart[i]) { %>
                       <img src="data:image/png;base64,<%=flowchart[i]%>">
                     <% } %>
+                    <% if(locals.csv_data && csv_data[i].csv_data){ %>
+                      <table border="1">
+                        <%
+                          const rows = csv_data[i].csv_data.split('\n');
+                          rows.forEach((row, rowIndex) => {
+                            const cols = row.split(',');
+                            if (rowIndex === 0) { %>
+                              <thead>
+                                <tr>
+                                  <% cols.forEach(col => { %>
+                                    <th><%= col.trim() %></th>
+                                  <% }); %>
+                                </tr>
+                              </thead>
+                            <% } else { %>
+                              <tbody>
+                                <tr>
+                                  <% cols.forEach(col => { %>
+                                    <td><%= col.trim() %></td>
+                                  <% }); %>
+                                </tr>
+                              </tbody>
+                            <% }
+                          });
+                        %>
+                      </table>
+                    <% } %>
                   </div>
                 <%}; %>
               <% }else{ %>
@@ -112,6 +139,10 @@
                   <div class="slider_container">
                     <input type="checkbox" id="enable-flowchart" name="enable-flowchart" />
                     <label for="enable-flowchart">Flowchart</label>
+                  </div>
+                  <div class="slider_container">
+                    <input type="checkbox" id="enable-table" name="enable-table" />
+                    <label for="enable-table">Table</label>
                   </div>
                 </div>
               </div>

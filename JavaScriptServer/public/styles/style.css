@@ -138,6 +138,16 @@ body {
   overflow-wrap: break-word;
 }
 
+.bot-message table{
+  background-color: #302e2e;
+  padding: 10px;
+  color: white;
+  border-radius: 10px;
+  max-width: 70%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
 .chat-input-wrapper {
   display: flex;
   justify-content: center;
