@@ -16,8 +16,7 @@ const PORT =3000;
 
 dotenv.config();
 
-const flaskurl = "https://gbrh7rr7-5000.inc1.devtunnels.ms";
-//Localhost: http://127.0.0.1:5000
+const flaskurl = "http://127.0.0.1:5000";
 
 const db = new pg.Client({
   user: process.env.user,
@@ -320,7 +319,7 @@ app.post('/uploadpdf', upload.single('pdfFile'), async (req, res) => {
         ...form.getHeaders()
       }
     });
-    
+
     res.redirect(`/pdfchats?chatid=${chat_id}`);
   } catch (error) {
     console.error('Error sending file and chat_id to Flask Server:', error);
